@@ -1,11 +1,9 @@
 /*
- * linux/fs/fmc/hdd_symlink.c
+ * fmcfs/fmc_hdd/hdd_symlink.c
  *
  * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
- * Beijing University of Posts and Telecommunications,
- * and CPU Center @ Tsinghua University.
- *
- * from linux/fs/ext2/symlink.c
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
  *
  * This program can be redistributed under the terms of the GNU Public License.
  */

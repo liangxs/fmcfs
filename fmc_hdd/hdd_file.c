@@ -1,11 +1,9 @@
 /*
- * linux/fs/fmc/hdd_file.c
+ * fmcfs/fmc_hdd/hdd_file.c
  * 
  * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
- * Beijing University of Posts and Telecommunications,
- * CPU Center @ Tsinghua University.
- *
- * from linux/fs/ext2/file.c
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
  *
  * This program can be redistributed under the terms of the GNU Public License.
  */

@@ -1,11 +1,9 @@
 /*
- * linux/fs/fmc/hdd_dir.c
+ * fmcfs/fmc_hdd/hdd_dir.c
  * 
  * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
- * Beijing University of Posts and Telecommunications,
- * and CPU Center @ Tsinghua University.
- *
- * from linux/fs/ext2/ialloc.c
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
  *
  * This program can be redistributed under the terms of the GNU Public License.
  */
@@ -16,7 +14,7 @@
 #include <linux/buffer_head.h>
 #include <linux/random.h>
 
-#include "fmc_fs.h"
+#include "../fmc_fs.h"
 #include "hdd.h"
 
 /* 确定目录文件 inode 所在的块组 */

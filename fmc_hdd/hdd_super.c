@@ -1,9 +1,9 @@
 /*
- * linux/fs/fmc/super.c
+ * fmcfs/fmc_hdd/super.c
  * 
  * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
- * Beijing University of Posts and Telecommunications,
- * CPU Center @ Tsinghua University.
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
  *
  * This program can be redistributed under the terms of the GNU Public License.
  */
@@ -30,7 +30,7 @@
 #include <linux/backing-dev.h>
 #include <linux/kthread.h>
 
-#include "fmc_fs.h"
+#include "../fmc_fs.h"
 #include "hdd.h"
 
 static struct kmem_cache *hdd_inode_cachep;

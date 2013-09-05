@@ -1,11 +1,9 @@
 /*
- * linux/fs/fmc/hdd_balloc.c
+ * fmcfs/fmc_hdd/hdd_balloc.c
  * 
  * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
- * Beijing University of Posts and Telecommunications,
- * CPU Center @ Tsinghua University.
- *
- * from linux/fs/ext2/balloc.c
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
  *
  * This program can be redistributed under the terms of the GNU Public License.
  */

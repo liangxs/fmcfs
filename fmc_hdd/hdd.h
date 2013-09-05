@@ -1,4 +1,12 @@
-/* linux/fs/fmc/hdd.h */
+/*
+ * fmcfs/fmc_hdd/hdd.h
+ * 
+ * Copyright (C) 2013 by Xuesen Liang, <liangxuesen@gmail.com>
+ * @ Beijing University of Posts and Telecommunications,
+ * @ CPU & SoC Center of Tsinghua University.
+ *
+ * This program can be redistributed under the terms of the GNU Public License.
+ */
 
 #ifndef __LINUX_FS_FMC_HDD_H__
 #define __LINUX_FS_FMC_HDD_H__
@@ -12,7 +20,7 @@
 #include <linux/blockgroup_lock.h>
 #include <linux/percpu_counter.h>
 
-#include "ssd.h"
+#include "../fmc_ssd/ssd.h"
 
 #define HDD_FT_UNKNOWN		0		/* 文件类型 */
 #define HDD_FT_REG_FILE		1
