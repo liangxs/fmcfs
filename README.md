@@ -7,13 +7,19 @@ fmcfs 是在 Linux 环境下开发的一个用于整合磁盘和固态盘的单�
 
 fmcfs 名称含义如下: 
 
->f 表示 Flash-based SSD, 
+>**f** 表示 Flash-based SSD, 
 
->m 表示 Magnetic-based HDD, 
+>**m** 表示 Magnetic-based HDD, 
 
->c 表示 Cloud storage, (注: 设计初期准备把云存储作为第三级存储整合进来, 但这项功能目前还没有开发, 留待以后扩展.)
+>**c** 表示 Cloud storage, (注: 设计初期准备把云存储作为第三级存储整合进来, 但这项功能目前还没有开发, 留待以后扩展.)
 
->fs 表示 file system.
+>**fs** 表示 file system.
 
 
 ##2. 系统整体架构
+fmcfs 被设计为 Linux 下的一个文件系统功能模块, 在 Linux 中的位置如下图所示:
+![fmcfs](./pic/fmcfs_in_kernel.jpg " fmcfs 模块在 linux 中的位置")
+
+
+##3. 源代码文件说明
+
