@@ -19,7 +19,7 @@ fmcfs 名称含义如下:
 ##2. fmcfs 文件系统架构
 fmcfs 被设计为 Linux 下的一个文件系统功能模块, 在 Linux 中的位置如下图所示:
 
-![fmcfs](./pic/fmcfs_in_kernel.jpg " fmcfs 模块在 linux 中的位置")
+![fmcfs](./pics/fmcfs_in_kernel.jpg " fmcfs 模块在 linux 中的位置")
 <center> 图 1. fmcfs 模块在 linux 中的位置 </center>
 
 fmcfs 模块中有两个子功能模块: fmc\_ssd 模块和 fmc\_hdd 模块. 模块功能如下所示:
