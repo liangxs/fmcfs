@@ -33,10 +33,8 @@ const struct file_operations hdd_file_operations = {
 
 	.mmap		= generic_file_mmap,
 	.fsync		= simple_fsync,
-
-	.mmap		= f2fs_file_mmap,
-	.fsync		= f2fs_sync_file,
-	.fallocate	= f2fs_fallocate,
+	//.mmap		= f2fs_file_mmap,
+	//.fsync		= f2fs_sync_file,
 
 	.unlocked_ioctl = hdd_ioctl,
 

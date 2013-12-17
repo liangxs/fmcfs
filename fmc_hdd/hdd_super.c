@@ -103,7 +103,7 @@ static void hdd_do_sync_fs(struct super_block *sb, int wait)
 	tmp = percpu_counter_sum_positive(&sbi->ssd_blks_count);
 	hdd_sb->s_ssd_blocks_count = cpu_to_le32(tmp);	/* 到 SSD 的块数 */
 
-	hdd_sb->s_hdd_idx = cpu_to_le32(sbi->hdd_idx);	/* 在 ssd 中的下标 */
+	hdd_sb->s_hdd_idx = cpu_to_le32(sbi->hdd_idx);	/* 在 SSD 中的下标 */
 
 	hdd_sb->s_cld_blocks_count = cpu_to_le64(
 		percpu_counter_sum_positive(&sbi->cld_blks_count));
@@ -112,7 +112,7 @@ static void hdd_do_sync_fs(struct super_block *sb, int wait)
 	hdd_sb->s_cld_files_count = cpu_to_le32(tmp);	/* 迁移到 Cloud 的文件数 */
 
 	hdd_sb->s_total_access = cpu_to_le64(
-		percpu_counter_sum_positive(&sbi->cld_blks_count));/* 总访问次数 */
+		percpu_counter_sum_positive(&sbi->total_access));/* 总访问次数 */
 
 	for (i = 0; i < FMC_MAX_LEVELS) {		/* 约1K-每个访问级别的块数 */
 		tmp = percpu_counter_sum_positive(&sbi->blks_per_lvl[i]);

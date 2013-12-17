@@ -44,7 +44,7 @@ struct hdd_group_desc * hdd_get_group_desc(struct super_block * sb,
 	return desc + offset; /* 组描述符结构的起始地址 */
 }
 
-/* 调整组中空闲块数和总空闲块数 */
+/* 调整总空闲块数和组中空闲块数 */
 static void group_adjust_blocks(struct super_block *sb, int group_no,
 	struct hdd_group_desc *desc, struct buffer_head *bh, int count)
 {

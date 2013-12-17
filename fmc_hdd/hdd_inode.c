@@ -655,7 +655,7 @@ static int hdd_get_blocks(struct inode *inode,
 	set_buffer_new(bh_result);
 got_it:
 	/* 根据 inode 中的地址块的相对块号, 更新访问计数, 并返回所在位置:SSD/HDD */
-	location = access_info_add(inode, chain+depth-1, offsets[depth-1]);
+	location = access_info_inc(inode, chain+depth-1, offsets[depth-1]);
 
 	/* 根据实际位置, 则可记录 [设备+实际块号] 到 bh_result 中 */
 	if(location == BLOCK_ON_SSD) {
@@ -1040,13 +1040,13 @@ void access_info_init(struct inode *inode,
 }
 
 /* 增加访问计数, 若访问计数超过了平均值, 则迁移到 SSD, 返回位置 */
-int access_info_add(inode, Indirect *branch, unsigned int offset)
+int access_info_inc(inode, Indirect *branch, unsigned int offset)
 {
 /*
   branch.bh 若为 NULL, 表示 offset 为直接块偏移, 否则为间接块偏移.
   
   
-  若是目录文件, 则一定进行迁移;
+  //若是目录文件, 则一定进行迁移;
 
   若原来在HDD上, 则更新SSD上的访问信息, 访问级别等, 并判断是否需要做迁移
 	  branch->key 记录了块号, 若在此新迁移, 则需要更新其值.并标记 bh 为脏.
@@ -1055,7 +1055,8 @@ int access_info_add(inode, Indirect *branch, unsigned int offset)
 
   返回 1 表示在SSD上, 0 表示在 HDD 上
  */
-struct buffer_head *bh;
+	struct buffer_head *bh;
+	return 0;
 }
 
 /* 释放数据块, 减少其访问计数, 若块在SSD上, 则释放块, 并标记块号为 0 */
@@ -1164,9 +1165,9 @@ const struct address_space_operations hdd_aops = {
 	.direct_IO		= hdd_direct_IO,
 	.bmap			= hdd_bmap,
 
-	.set_page_dirty		= f2fs_set_data_page_dirty,
-	.invalidatepage		= f2fs_invalidate_data_page,
-	.releasepage		= f2fs_release_data_page,
+	//.set_page_dirty		= f2fs_set_data_page_dirty,
+	//.invalidatepage		= f2fs_invalidate_data_page,
+	//.releasepage		= f2fs_release_data_page,
 
 	.is_partially_uptodate	= block_is_partially_uptodate,
 	.error_remove_page	= generic_error_remove_page,
