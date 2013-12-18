@@ -255,7 +255,7 @@ static struct super_operations hdd_sops = {
 	.put_super	= hdd_put_super,
 	.statfs		= hdd_statfs,
 	.show_options	= hdd_show_options,
-	.write_inode	= hdd_write_inode, /* inode.c */
+	.write_inode	= hdd_write_inode,/* inode.c */
 	.delete_inode	= hdd_delete_inode,/* inode.c */
 };
 
@@ -333,7 +333,7 @@ static int init_sb_info(struct hdd_sb_info *sbi)
 
 	memcpy(sbi->cld_name, h->s_cld_name, 16);/* 云存储名字 */
 	sbi->hdd_idx = le32_to_cpu(h->s_hdd_idx);/* 在 ssd 中 uuid 数组的下标 */
-	sbi->cld_blks_count = le64_to_cpu(h->s_cld_blocks_count);/* 迁移到 Cloud 的块数 */
+	sbi->cld_blks_count = le64_to_cpu(h->s_cld_blocks_count)/* 迁移到 Cloud 的块数 */
 	sbi->cld_files_count= le32_to_cpu(h->s_cld_files_count);/* 迁移到 Cloud 的文件数 */
 	sbi->upper_ratio    = le32_to_cpu(h->s_upper_ratio);	/* 触发迁移块的空间使用率 */
 	sbi->max_unaccess   = le32_to_cpu(h->s_max_unaccess);	/* 触发迁移文件的未访问年龄 - 秒 */
@@ -601,7 +601,7 @@ static int hdd_fill_sb(struct super_block *sb, void *data, int silent)
 		goto release_hdd_bh;
 	}
 
-	sbi->gdt_blocks = le32_to_cpu(hdd_sb->s_gdt_blocks);
+	sbi->gdt_blocks = le32_to_cpu(hdd_sb->s_gdt_blocks)
 	i = sbi->gdt_blocks * sizeof (struct buffer_head *);
 	sbi->group_desc = kmalloc (i, GFP_KERNEL);/* 分配组描述符块的缓冲头 */
 	if (!sbi->group_desc) {

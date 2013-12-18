@@ -50,11 +50,11 @@ static void hdd_usage(void)
 {
 	fprintf(stderr, "Usage: fmc_hdd [options] device\n");
 	fprintf(stderr, "[options]\n");
-	fprintf(stderr, "-a: file age(second) to trigging migration [default:0]\n");
-	fprintf(stderr, "-b: blocksize, can be 4 [default:4]KB\n");
-	fprintf(stderr, "-c: cloud service name [default:NULL]\n");
-	fprintf(stderr, "-s: ssd device name [default:NULL]\n");
-	fprintf(stderr, "-r: upper used ratio [default:90]\n\n");
+	fprintf(stderr, "-a file age(second) to trigging migration [default:0]\n");
+	fprintf(stderr, "-b blocksize, can be 4 [default:4]KB\n");
+	fprintf(stderr, "-c cloud service name [default:NULL]\n");
+	fprintf(stderr, "-s ssd device name [default:NULL]\n");
+	fprintf(stderr, "-r upper used ratio [default:90]\n\n");
 
 	exit(1);
 }

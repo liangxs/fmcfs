@@ -14,7 +14,7 @@
 #include <linux/types.h>
 #include <linux/fs.h>
 
-#include "./fmc_hdd/hdd.h"
+#include "fmc_hdd/hdd.h"
 
 /* 输出调试信息 */
 #define FMCFS_DEBUG
