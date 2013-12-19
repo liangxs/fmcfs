@@ -52,7 +52,7 @@ ino_t hdd_inode_by_name(struct inode *dir, struct qstr *child)
 
 	de = hdd_find_entry (dir, child, &page);
 	if (de) {
-		res = le32_to_cpu(de->inode);
+		res = le32_to_cpu(de->ino);
 		hdd_put_page(page);
 	}
 	return res;
@@ -125,7 +125,7 @@ static void hdd_check_page(struct page *page, int quiet)
 			goto Enamelen;
 		if (((offs + rec_len - 1) ^ offs) & ~(chunk_size-1))
 			goto Espan; /* 扩展文件 */
-		if (le32_to_cpu(p->inode) >= max_inumber) /* inode 号太大 */
+		if (le32_to_cpu(p->ino) >= max_inumber) /* inode 号太大 */
 			goto Einumber;
 	}
 	if (offs != limit)
@@ -161,7 +161,7 @@ bad_entry:
 		"bad entry in directory #%lu: : %s - "
 		"offset=%lu, inode=%lu, rec_len=%d, name_len=%d",
 		dir->i_ino, error, (page->index<<PAGE_CACHE_SHIFT)+offs,
-		(unsigned long) le32_to_cpu(p->inode),
+		(unsigned long) le32_to_cpu(p->ino),
 		rec_len, p->name_len);
 	goto fail;
 Eend:
@@ -171,7 +171,7 @@ Eend:
 			"entry in directory #%lu spans the page boundary"
 			"offset=%lu, inode=%lu",
 			dir->i_ino, (page->index<<PAGE_CACHE_SHIFT)+offs,
-			(unsigned long) le32_to_cpu(p->inode));
+			(unsigned long) le32_to_cpu(p->ino));
 	}
 fail:
 	SetPageChecked(page);
@@ -217,7 +217,7 @@ static inline int hdd_match (int len, const char * const name,
 {
 	if (len != de->name_len) /* 长度不同 */
 		return 0;
-	if (!de->inode)		/* inode 编号为 0 */
+	if (!de->ino)		/* inode 编号为 0 */
 		return 0;
 	return !memcmp(name, de->name, len); /* 比较文件名 */
 }
@@ -286,7 +286,7 @@ int hdd_add_link (struct dentry *dentry, struct inode *inode)
 				name_len = 0;
 				rec_len = chunk_size;
 				de->rec_len = hdd_rec_len_to_disk(chunk_size);
-				de->inode = 0;
+				de->ino = 0;
 				goto got_it; /* 需要新分配块 */
 			}
 
@@ -303,7 +303,7 @@ int hdd_add_link (struct dentry *dentry, struct inode *inode)
 
 			name_len = HDD_DIR_REC_LEN(de->name_len);
 			rec_len = hdd_rec_len_from_disk(de->rec_len);
-			if (!de->inode && rec_len >= reclen) /* 可用的空闲目录项 */
+			if (!de->ino && rec_len >= reclen) /* 可用的空闲目录项 */
 				goto got_it;
 
 			if (rec_len >= name_len + reclen) /* 目录项中有足够空闲空间 */
@@ -326,7 +326,7 @@ got_it:
 	if (err)
 		goto out_unlock;
 
-	if (de->inode) { /* 若是分配在原有效目录项中的空闲部分 */
+	if (de->ino) { /* 若是分配在原有效目录项中的空闲部分 */
 		hdd_dirent *de1 = (hdd_dirent *) ((char *) de + name_len);
 		de1->rec_len = hdd_rec_len_to_disk(rec_len - name_len);
 		de->rec_len = hdd_rec_len_to_disk(name_len); /* 目录项长度 */
@@ -336,7 +336,7 @@ got_it:
 	/* 写目录项 */
 	de->name_len = namelen; /* 文件名长度 */
 	memcpy(de->name, name, namelen); /* 拷贝文件名 */
-	de->inode = cpu_to_le32(inode->i_ino); /* inode 编号 */
+	de->ino = cpu_to_le32(inode->i_ino); /* inode 编号 */
 	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT];
 
 	err = hdd_commit_chunk(page, pos, rec_len); /* 提交目录文件的页 */
@@ -463,7 +463,7 @@ int hdd_delete_entry (struct hdd_dir_entry * dir, struct page * page )
 	BUG_ON(err);
 	if (pde)
 		pde->rec_len = hdd_rec_len_to_disk(to - from);
-	dir->inode = 0;
+	dir->ino = 0;
 	err = hdd_commit_chunk(page, pos, to - from);
 	inode->i_ctime = inode->i_mtime = CURRENT_TIME_SEC;
 	HDD_I(inode)->i_flags &= ~FS_BTREE_FL;
@@ -497,15 +497,15 @@ int hdd_make_empty(struct inode *inode, struct inode *parent)
 	de->name_len = 1;
 	de->rec_len = hdd_rec_len_to_disk(HDD_DIR_REC_LEN(1));
 	memcpy (de->name, ".\0\0", 4); /* 本目录 */
-	de->inode = cpu_to_le32(inode->i_ino);
-	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT]
+	de->ino = cpu_to_le32(inode->i_ino);
+	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT];
 
 	de = (struct hdd_dir_entry *)(kaddr + HDD_DIR_REC_LEN(1));
 	de->name_len = 2;
 	de->rec_len = hdd_rec_len_to_disk(chunk_size - HDD_DIR_REC_LEN(1));
-	de->inode = cpu_to_le32(parent->i_ino);
+	de->ino = cpu_to_le32(parent->i_ino);
 	memcpy (de->name, "..\0", 4); /* 父目录 */
-	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT]
+	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT];
 	kunmap_atomic(kaddr, KM_USER0);
 	err = hdd_commit_chunk(page, 0, chunk_size);
 fail:
@@ -541,14 +541,14 @@ int hdd_empty_dir (struct inode * inode)
 				printk("kaddr=%p, de=%p\n", kaddr, de);
 				goto not_empty;
 			}
-			if (de->inode != 0) {
+			if (de->ino != 0) {
 				/* check for . and .. */
 				if (de->name[0] != '.')
 					goto not_empty;
 				if (de->name_len > 2)
 					goto not_empty;
 				if (de->name_len < 2) {
-					if (de->inode !=
+					if (de->ino !=
 						cpu_to_le32(inode->i_ino))
 						goto not_empty;
 				} else if (de->name[1] != '.')
@@ -591,7 +591,7 @@ void hdd_set_link(struct inode *dir, struct hdd_dir_entry *de,
 	err = __hdd_write_begin(NULL, page->mapping, pos, len,
 		AOP_FLAG_UNINTERRUPTIBLE, &page, NULL);
 	BUG_ON(err);
-	de->inode = cpu_to_le32(inode->i_ino);
+	de->ino = cpu_to_le32(inode->i_ino);
 	de->file_type = hdd_type_by_mode[(inode->i_mode & S_IFMT)>>S_SHIFT];
 	err = hdd_commit_chunk(page, pos, len);
 	hdd_put_page(page);
@@ -662,7 +662,7 @@ hdd_readdir (struct file * filp, void * dirent, filldir_t filldir)
 				hdd_put_page(page);
 				return -EIO;
 			}
-			if (de->inode) {
+			if (de->ino) {
 				int over;
 				unsigned char d_type = DT_UNKNOWN;
 
@@ -672,7 +672,7 @@ hdd_readdir (struct file * filp, void * dirent, filldir_t filldir)
 				offset = (char *)de - kaddr;
 				over = filldir(dirent, de->name, de->name_len,
 						(n<<PAGE_CACHE_SHIFT) | offset,
-						le32_to_cpu(de->inode), d_type);
+						le32_to_cpu(de->ino), d_type);
 				if (over) {
 					hdd_put_page(page);
 					return 0;

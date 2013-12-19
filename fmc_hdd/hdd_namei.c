@@ -17,6 +17,8 @@
 #include "../fmc_fs.h"
 #include "hdd.h"
 
+extern const struct address_space_operations hdd_aops;
+
 /* 读取父目录项对象 */
 struct dentry *hdd_get_parent(struct dentry *child)
 {

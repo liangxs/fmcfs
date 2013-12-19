@@ -263,7 +263,7 @@ struct hdd_dir_entry {
 
 typedef struct hdd_dir_entry hdd_dirent;
 
-#define HDD_BLOCKS_PER_GROUP(s)	(HDD_SB(s)->blocks_per_group)
+#define HDD_BLOCKS_PER_GROUP(s)	(HDD_SB(s)->blks_per_group)
 #define HDD_DESC_PER_BLOCK(s)	(HDD_SB(s)->desc_per_block)
 #define HDD_INODES_PER_GROUP(s)	(HDD_SB(s)->inodes_per_group)
 #define HDD_DESC_PER_BLOCK_BITS(s) (HDD_SB(s)->desc_per_blk_bits)

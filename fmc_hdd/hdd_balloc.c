@@ -14,6 +14,9 @@
 
 #include "hdd.h"
 
+static struct buffer_head *
+read_block_bitmap(struct super_block *sb, unsigned int );
+
 /* 取得一个组描述符地址 */
 struct hdd_group_desc * hdd_get_group_desc(struct super_block * sb,
 	unsigned int block_group, struct buffer_head ** bh)
@@ -70,11 +73,11 @@ static void group_adjust_blocks(struct super_block *sb, int group_no,
 
 /* 释放 block 开始的 count 个块, 并更新相关信息 */
 void hdd_free_blocks (struct inode * inode,
-	unsigned long block, unsigned long count)
+	unsigned int block, unsigned long count)
 {
 	struct buffer_head * bitmap_bh = NULL;
 	struct buffer_head * bh2;
-	unsigned long block_group;
+	unsigned int block_group;
 	unsigned long bit;
 	unsigned long i;
 	struct super_block * sb = inode->i_sb;
