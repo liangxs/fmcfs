@@ -28,8 +28,6 @@ typedef struct _inderect {
 	struct buffer_head *bh; /* 块号对应的块内容 */
 } Indirect;
 
-extern const struct address_space_operations hdd_aops;
-
 int hdd_sync_inode(struct inode *inode);
 
 void access_info_init(struct inode *inode,struct buffer_head *bh, unsigned int offset);

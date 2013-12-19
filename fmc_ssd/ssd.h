@@ -16,6 +16,10 @@
 #include <linux/slab.h>
 #include <linux/magic.h>
 
+#include "../fmc_fs.h"
+#include "../fmc_cld/cld.h"
+#include "../fmc_hdd/hdd.h"
+
 #define SSD_SECTOR_SIZE		512		/* 扇区大小 */
 #define SSD_SECTORS_PER_BLK	8		/* 默认 4K 块 */
 #define SSD_BLKS_PER_SEG	512		/* 段中块数: 4KB => 2 MB  段 */

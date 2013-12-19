@@ -21,7 +21,8 @@
 #include <linux/percpu_counter.h>
 
 #include "../fmc_fs.h"
-#include "../fmc_ssd/ssd.h"
+#include "../fmc_cld/cld.h"
+#include "../fmc_hdd/ssd.h"
 
 #define HDD_FT_UNKNOWN		0		/* 文件类型 */
 #define HDD_FT_REG_FILE		1
@@ -80,6 +81,19 @@
 
 #define HDD_REG_FLMASK (~(HDD_DIRSYNC_FL | HDD_TOPDIR_FL))
 #define HDD_OTHER_FLMASK (HDD_NODUMP_FL | HDD_NOATIME_FL)
+
+/* 新 inode 应该从父亲继承的标志 */
+#define HDD_FL_INHERITED (\
+	HDD_SECRM_FL | HDD_UNRM_FL | HDD_COMPR_FL |\
+	HDD_SYNC_FL  | HDD_IMMUTABLE_FL | HDD_APPEND_FL |\
+	HDD_NODUMP_FL | HDD_NOATIME_FL  | HDD_JOURNAL_DATA_FL |\
+	HDD_NOTAIL_FL | HDD_DIRSYNC_FL)
+
+/* inode 对象状态 */
+#define HDD_STATE_JDATA			0x00000001 /* 日志数据 - journaled data exists */
+#define HDD_STATE_NEW			0x00000002 /* 新创建 - inode is newly created */
+#define HDD_STATE_XATTR			0x00000004 /* has in-inode xattrs */
+#define HDD_STATE_FLUSH_ON_CLOSE	0x00000008
 
 #define HDD_LINK_MAX		32000		/* 最大硬链接数/子目录文件数 */
 
@@ -263,11 +277,6 @@ struct hdd_dir_entry {
 
 typedef struct hdd_dir_entry hdd_dirent;
 
-#define HDD_BLOCKS_PER_GROUP(s)	(HDD_SB(s)->blks_per_group)
-#define HDD_DESC_PER_BLOCK(s)	(HDD_SB(s)->desc_per_block)
-#define HDD_INODES_PER_GROUP(s)	(HDD_SB(s)->inodes_per_group)
-#define HDD_DESC_PER_BLOCK_BITS(s) (HDD_SB(s)->desc_per_blk_bits)
-
 /* 取得块组锁 */
 static inline spinlock_t * sb_bgl_lock(struct hdd_sb_info *sbi,
 	unsigned int block_group)
@@ -277,7 +286,7 @@ static inline spinlock_t * sb_bgl_lock(struct hdd_sb_info *sbi,
 
 static inline struct hdd_sb_info *HDD_SB(struct super_block *sb)
 {
-	return sb->s_fs_info;
+	return (struct hdd_sb_info *) sb->s_fs_info;
 }
 
 static inline struct hdd_inode_info *HDD_I(struct inode *inode)
@@ -285,13 +294,67 @@ static inline struct hdd_inode_info *HDD_I(struct inode *inode)
 	return container_of(inode, struct hdd_inode_info, vfs_inode);
 }
 
+/* inode 在内存和磁盘上的位置 */
+struct hdd_iloc {
+	struct buffer_head *bh;
+	unsigned long offset;
+	unsigned long block_group;
+};
+
+/* 取得 hdd inode 内容*/
+static inline struct hdd_inode *hdd_raw_inode(struct hdd_iloc *iloc)
+{
+	return (struct hdd_inode *) (iloc->bh->b_data + iloc->offset);
+}
+
+#define HDD_BLOCKS_PER_GROUP(s)	(HDD_SB(s)->blks_per_group)
+#define HDD_DESC_PER_BLOCK(s)	(HDD_SB(s)->desc_per_block)
+#define HDD_INODES_PER_GROUP(s)	(HDD_SB(s)->inodes_per_group)
+#define HDD_DESC_PER_BLOCK_BITS(s) (HDD_SB(s)->desc_per_blk_bits)
+
 /* 计算块组起始块号 */
 static inline unsigned int
 hdd_group_first_block_no(struct super_block *sb, unsigned long group_no)
 {
-	return group_no * (unsigned int)HDD_BLKS_PER_GROUP(sb) +
+	return group_no * (unsigned int)HDD_BLOCKS_PER_GROUP(sb) +
 		le32_to_cpu(HDD_SB(sb)->hdd_sb->s_first_data_block);
 }
+
+/* 检查 ino 是否合法 */
+static inline int hdd_valid_inum(struct super_block *sb, unsigned long ino)
+{
+	return  ino == HDD_ROOT_INO ||
+	       (ino >= HDD_FIRST_INO(sb) &&
+		ino <= le32_to_cpu(HDD_SB(sb)->s_es->s_inodes_count));
+}
+
+/* 挂载选项 */
+#define HDD_MOUNT_CHECK			0x00001	/* 装载时检查 */
+#define HDD_MOUNT_DEBUG			0x00008	/* 一些调试信息 */
+
+/* 清除, 设置, 测试挂载选项 */
+#define clear_opt(o, opt)		o &= ~HDD_MOUNT_##opt
+#define set_opt(o, opt)			o |= HDD_MOUNT_##opt
+#define test_opt(sb, opt)		(HDD_SB(sb)->s_mount_opt & \
+					HDD_MOUNT_##opt)
+
+/* 哈希数目录索引 */
+#define is_dx(dir) ((HDD_I(dir)->i_flags & HDD_INDEX_FL))
+#define HDD_DIR_LINK_MAX(dir) (!is_dx(dir) && (dir)->i_nlink >= HDD_LINK_MAX)
+#define HDD_DIR_LINK_EMPTY(dir) ((dir)->i_nlink == 2 || (dir)->i_nlink == 1)
+
+/* hash info structure used by the directory hash */
+struct dx_hash_info{
+	u32		hash;		/* 哈希值 */
+	u32		minor_hash;	/*  */
+	int		hash_version;	/* 所用的哈希版本 */
+	u32		*seed;		/* 自定义种子 */
+};
+
+#define HDD_HTREE_EOF	0x7fffffff
+
+/* Control parameters used by hdd_htree_next_block */
+#define HASH_NB_ALWAYS		1
 
 static inline __u32 hdd_mask_flags(umode_t mode, __u32 flags)
 {
@@ -341,7 +404,6 @@ extern int hddfs_dirhash(const char *name, int len, struct
 extern struct inode * hdd_new_inode (struct inode *, int);
 extern void hdd_free_inode (struct inode *);
 extern struct inode * hdd_orphan_get (struct super_block *, unsigned long);
-//extern unsigned long hdd_count_free_inodes (struct super_block *);
 extern unsigned long hdd_count_dirs (struct super_block *);
 extern void hdd_check_inodes_bitmap (struct super_block *);
 extern unsigned long hdd_count_free (struct buffer_head *, unsigned);
@@ -402,5 +464,27 @@ extern int hdd_empty_dir (struct inode * inode);
 extern struct hdd_dir_entry * hdd_dotdot (struct inode *dir, struct page **p);
 extern void hdd_set_link(struct inode *dir, struct hdd_dir_entry *de,
 	struct page *page, struct inode *inode, int update_times);
+
+	/* 错误与警告 - super.c */
+
+#define hdd_std_error(sb, errno)				\
+	do {							\
+		if ((errno))					\
+		    __hdd_std_error((sb), __func__, (errno));	\
+	} while (0)
+
+extern const struct address_space_operations hdd_aops;
+/* 目录文件 操作函数表 - dir.c */
+extern const struct file_operations hdd_dir_operations;
+/* 文件操作函数表 - file.c */
+extern const struct file_operations hdd_file_operations;
+extern const struct inode_operations hdd_file_inode_operations;
+/* inode 操作函数表 - namei.c */
+extern const struct inode_operations hdd_dir_inode_operations;
+extern const struct inode_operations hdd_special_inode_operations;
+/* 符号链接操作函数表 - symlink.c */
+extern const struct inode_operations hdd_symlink_inode_operations;
+extern const struct inode_operations hdd_fast_symlink_inode_operations;
+
 
 #endif	/*__LINUX_FS_FMC_HDD_H__*/
