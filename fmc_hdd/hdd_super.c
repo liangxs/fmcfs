@@ -30,8 +30,11 @@
 #include <linux/backing-dev.h>
 #include <linux/kthread.h>
 
-#include "../fmc_fs.h"
 #include "hdd.h"
+
+LIST_HEAD(ssd_sb_infos);
+DEFINE_SPINLOCK(ssd_sbi_lock);
+
 
 static struct kmem_cache *hdd_inode_cachep;
 
@@ -105,11 +108,8 @@ static void hdd_do_sync_fs(struct super_block *sb, int wait)
 
 	hdd_sb->s_hdd_idx = cpu_to_le32(sbi->hdd_idx);	/* 在 SSD 中的下标 */
 
-	hdd_sb->s_cld_blocks_count = cpu_to_le64(
-		percpu_counter_sum_positive(&sbi->cld_blks_count));
-
-	tmp = percpu_counter_sum_positive(&sbi->cld_files_count);
-	hdd_sb->s_cld_files_count = cpu_to_le32(tmp);	/* 迁移到 Cloud 的文件数 */
+	hdd_sb->s_cld_blocks_count = cpu_to_le64(sbi->cld_blks_count);
+	hdd_sb->s_cld_files_count = cpu_to_le32(sbi->cld_files_count);
 
 	hdd_sb->s_total_access = cpu_to_le64(
 		percpu_counter_sum_positive(&sbi->total_access));/* 总访问次数 */
@@ -194,7 +194,7 @@ static int hdd_statfs (struct dentry * dentry, struct kstatfs * buf)
 {
 	struct super_block *sb = dentry->d_sb;
 	struct hdd_sb_info *sbi = HDD_SB(sb);
-	struct hdd_super_block *hdd_sb = sbi->hdd_sb;
+	//struct hdd_super_block *hdd_sb = sbi->hdd_sb;
 	u64 id = huge_encode_dev(sb->s_bdev->bd_dev);
 
 	buf->f_type = HDD_MAGIC;
@@ -224,7 +224,7 @@ static int hdd_show_options(struct seq_file *seq, struct vfsmount *vfs)
 	struct hdd_sb_info *sbi = HDD_SB(sb);
 
 	if (sbi->sb_block != 1)		/* 超级块所在块号 */
-		seq_printf(seq, ",sb=%lu", sbi->sb_block);
+		seq_printf(seq, ",sb=%u", sbi->sb_block);
 
 	if(sbi->hdd_sb->s_ssd_name)
 		seq_printf(seq, "ssd device: %s", sbi->hdd_sb->s_ssd_name);
@@ -375,7 +375,7 @@ static int init_sb_info(struct hdd_sb_info *sbi)
 /* 最大文件长度 */
 static loff_t hdd_max_size(void)
 {
-	loff_t upperlimit = (1LL << 32) - 1;
+	//loff_t upperlimit = (1LL << 32) - 1;
 	loff_t result = 0;
 	loff_t direct = HDD_NDIR_BLOCKS;
 	loff_t indirect = HDD_ADDR_PER_BLOCK;
@@ -682,7 +682,7 @@ free_per_cpu:
 	for (i = 0; i < FMC_MAX_LEVELS; i++)
 		percpu_counter_destroy(&sbi->blks_per_lvl[i]);
 
-release_gdt_bh:
+//release_gdt_bh:
 	for (i = 0; i < sbi->gdt_blocks; i++)
 		brelse(sbi->group_desc[i]);
 

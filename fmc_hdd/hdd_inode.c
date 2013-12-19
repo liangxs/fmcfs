@@ -508,7 +508,7 @@ static int hdd_alloc_branch(struct inode *inode, int indirect_blks,
 	unsigned int  current_block = 0;
 	struct buffer_head *bh = NULL;
 	unsigned int  addr_offset[4] = {0};
-	unsigned int from_direct = 0;
+	//unsigned int from_direct = 0;
 	int blocksize = inode->i_sb->s_blocksize;
 	struct hdd_sb_info *sbi = HDD_SB(inode->i_sb);
 
@@ -871,14 +871,14 @@ static void hdd_free_branches(struct inode *inode,
 	} else {/* 释放最后一链地址块 */
 		/* 释放访问信息和 SSD 上的块: 
 		inode, 地址块起始地址, 首个释放块地址偏移, 释放的块数 */
-		access_info_sub(inode, data, p - (__le32 *) data, q - p);
+		access_info_sub(inode, (__le32 *)data, p - (__le32 *) data, q - p);
 
 		hdd_free_data(inode, p, q);
 	}
 }
 
 /* 释放磁盘数据块, 到 inode 中指定的大小 */
-void hdd_trancate(struct inode *inode)
+void hdd_truncate(struct inode *inode)
 {
 	__le32 *i_data = HDD_I(inode)->i_data;
 	struct hdd_inode_info *hi = HDD_I(inode);
@@ -889,8 +889,8 @@ void hdd_trancate(struct inode *inode)
 	Indirect chain[4];	/* 实际块号路径 */
 	Indirect *partial;	/* 实际路径中的处理起点 */
 	__le32 nr = 0;		/* 块号 */
-	__le32 *p = NULL;	/* 块号在地址块中的地址 */
-	__le32 **addr = &p;
+	//__le32 *p = NULL;	/* 块号在地址块中的地址 */
+	//__le32 **addr = &p;
 
 	/* 只处理常规,目录,非快速符号链接 */
 	if (!(S_ISREG(inode->i_mode) || S_ISDIR(inode->i_mode) ||
@@ -1059,7 +1059,7 @@ int access_info_inc(struct inode * inode, Indirect *branch, unsigned int offset)
 
   返回 1 表示在SSD上, 0 表示在 HDD 上
  */
-	struct buffer_head *bh;
+	//struct buffer_head *bh;
 	return 0;
 }
 

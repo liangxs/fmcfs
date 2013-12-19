@@ -69,21 +69,21 @@ struct hdd_mount_options {
 #define HDD_MAX_REC_LEN			((1<<16)-1)
 
 /* 把磁盘格式目录项长度转换为 cpu 格式 */
-//static inline unsigned hdd_rec_len_from_disk(__le16 dlen) {
-//	unsigned len = le16_to_cpu(dlen); /* 直接转换 */
-//
-//	if (len == HDD_MAX_REC_LEN)	/* 值为 65535 */
-//		return 1 << 16;
-//	return len;
-//}
+static inline unsigned hdd_rec_len_from_disk(__le16 dlen) {
+	unsigned len = le16_to_cpu(dlen); /* 直接转换 */
+
+	if (len == HDD_MAX_REC_LEN)	/* 值为 65535 */
+		return 1 << 16;
+	return len;
+}
 /* 把目录项长度转换为磁盘格式 */
-//static inline __le16 hdd_rec_len_to_disk(unsigned len) {
-//	if (len == (1 << 16))
-//		return cpu_to_le16(HDD_MAX_REC_LEN);
-//	else if (len > (1 << 16))
-//		BUG();
-//	return cpu_to_le16(len);
-//}
+static inline __le16 hdd_rec_len_to_disk(unsigned len) {
+	if (len == (1 << 16))
+		return cpu_to_le16(HDD_MAX_REC_LEN);
+	else if (len > (1 << 16))
+		BUG();
+	return cpu_to_le16(len);
+}
 
 //#define NEXT_ORPHAN(inode) HDD_I(inode)->i_dtime
 

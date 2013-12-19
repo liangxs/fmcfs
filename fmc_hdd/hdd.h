@@ -22,7 +22,7 @@
 
 #include "../fmc_fs.h"
 #include "../fmc_cld/cld.h"
-#include "../fmc_hdd/ssd.h"
+#include "../fmc_ssd/ssd.h"
 
 #define HDD_FT_UNKNOWN		0		/* 文件类型 */
 #define HDD_FT_REG_FILE		1
@@ -324,8 +324,8 @@ hdd_group_first_block_no(struct super_block *sb, unsigned long group_no)
 static inline int hdd_valid_inum(struct super_block *sb, unsigned long ino)
 {
 	return  ino == HDD_ROOT_INO ||
-	       (ino >= HDD_FIRST_INO(sb) &&
-		ino <= le32_to_cpu(HDD_SB(sb)->s_es->s_inodes_count));
+	       (ino >= HDD_FIRST_INO &&
+		ino <= le32_to_cpu(HDD_SB(sb)->hdd_sb->s_inodes_count));
 }
 
 /* 挂载选项 */
@@ -391,7 +391,7 @@ extern void hdd_init_block_alloc_info(struct inode *);
 extern int hdd_check_dir_entry(const char *, struct inode *,
 struct hdd_dir_entry *, struct buffer_head *, unsigned long);
 extern int hdd_htree_store_dirent(struct file *dir_file, __u32 hash,
-				  __u32 minor_hash, struct hdd_dir_entry_2 *dirent);
+				  __u32 minor_hash, struct hdd_dir_entry *dirent);
 extern void hdd_htree_free_dir_info(struct dir_private_info *p);
 
 /* 文件同步操作 - fsync.c */

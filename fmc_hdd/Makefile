@@ -1,6 +1,6 @@
 obj-m := fmc_hdd.o
 
-fmc_hdd-objs := hdd_namei.o  hdd_file.o  hdd_dir.o  hdd_ioctl.o hdd_ialloc.o hdd_balloc.o hdd_symlink.o  hdd_super.o  hdd_inode.o    \
+fmc_hdd-objs := hdd_ialloc.o hdd_balloc.o hdd_symlink.o  hdd_super.o  hdd_inode.o  hdd_namei.o  hdd_file.o  hdd_dir.o   hdd_ioctl.o  \
             
 
 KDIR := /lib/modules/$(shell uname -r)/build

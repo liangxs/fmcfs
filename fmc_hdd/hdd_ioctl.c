@@ -23,17 +23,6 @@
 /* 用于不是目录和常规文件的标志 */
 #define HDD_OTHER_FLMASK (HDD_NODUMP_FL | HDD_NOATIME_FL)
 
-/* 去除给定类型 inode 的掩码标志 */
-static inline __u32 hdd_mask_flags(umode_t mode, __u32 flags)
-{
-	if (S_ISDIR(mode))
-		return flags;
-	else if (S_ISREG(mode))
-		return flags & HDD_REG_FLMASK;
-	else
-		return flags & HDD_OTHER_FLMASK;
-}
-
 long hdd_ioctl(struct file *filp, unsigned int cmd, unsigned long arg)
 {
 	struct inode *inode = filp->f_dentry->d_inode;

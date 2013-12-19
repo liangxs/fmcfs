@@ -16,9 +16,9 @@ struct cld_sb_info {
 };
 
 struct cld_operations {
-	int (*put)();			/* 上传文件 */
-	int (*get)();			/* 下载文件 */
-	int (*del)();			/* 删除文件 */
+	//int (*put)();			/* 上传文件 */
+	//int (*get)();			/* 下载文件 */
+	//int (*del)();			/* 删除文件 */
 };
 
 #endif	/*__LINUX_FS_FMC_CLD_H__*/

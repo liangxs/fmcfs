@@ -14,7 +14,6 @@
 #include <linux/sched.h>
 #include <linux/ctype.h>
 
-#include "../fmc_fs.h"
 #include "hdd.h"
 
 extern const struct address_space_operations hdd_aops;

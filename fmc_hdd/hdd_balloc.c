@@ -84,7 +84,7 @@ void hdd_free_blocks (struct inode * inode,
 	struct hdd_sb_info * sbi = HDD_SB(sb);
 	struct hdd_group_desc * desc;
 	struct hdd_super_block * hs = sbi->hdd_sb;
-	unsigned group_freed;
+	unsigned group_freed = 0;
 	unsigned long nr_in_grp = (block - le32_to_cpu(hs->s_first_data_block))
 		% sbi->blks_per_group;
 	
@@ -200,7 +200,7 @@ static int bitmap_search_next_usable_block(int start,
 	int next;
 
 	/* 取得[data+start(b) ~ data+max(bit)) 中的首个 0 bit */
-	next = find_next_zero_bit(bh->b_data, maxblocks, start);
+	next = find_next_zero_bit((unsigned long *)bh->b_data, maxblocks, start);
 
 	if (next >= maxblocks)
 		return -1; /* 范围内未找到空闲 bit */
@@ -222,7 +222,7 @@ static int find_next_usable_block(int start,
 			end_goal = maxblocks;
 
 		/* 查找第一个 '0' bit(按字节, 每个字节从低到高) */
-		here = find_next_zero_bit(bh->b_data, end_goal, start);
+		here = find_next_zero_bit((unsigned long *)bh->b_data, end_goal, start);
 		if (here < end_goal)
 			return here;
 	}
@@ -248,7 +248,7 @@ static int hdd_try_to_alloc(struct super_block *sb, unsigned int group,
 {
 //@grp_goal: 在块组中的相对块号
 
-	unsigned int group_first_block = 0;
+	//unsigned int group_first_block = 0;
        	int start = 0, end = 0;
 	unsigned long num = 0;
 	int i = 0;
@@ -273,7 +273,7 @@ repeat:
 		/* 找到空位后向前找找, 看还有没有空位 */
 		i = 0; 
 		while (i < 7 && grp_goal > start
-		&& !test_bit(grp_goal - 1, bitmap_bh->b_data)){
+		&& !test_bit(grp_goal - 1, (unsigned long *)bitmap_bh->b_data)){
 			i++;
 			grp_goal--;
 		}
@@ -339,7 +339,7 @@ unsigned int hdd_new_blocks(struct inode *inode,
 	struct hdd_sb_info *sbi;
 	unsigned long ngroups;
 	unsigned long num = *count;
-	unsigned long remain = 0;
+	//unsigned long remain = 0;
 
 	*errp = -ENOSPC;
 	sb = inode->i_sb;

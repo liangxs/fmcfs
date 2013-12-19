@@ -14,7 +14,6 @@
 #include <linux/buffer_head.h>
 #include <linux/random.h>
 
-#include "../fmc_fs.h"
 #include "hdd.h"
 
 /* 确定目录文件 inode 所在的块组 */
@@ -22,7 +21,7 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent)
 {
 	int parent_group = HDD_I(parent)->i_block_group;
 	struct hdd_sb_info *sbi = HDD_SB(sb);
-	struct hdd_super_block *hs = sbi->hdd_sb;
+	//struct hdd_super_block *hs = sbi->hdd_sb;
 	int ngroups = sbi->groups_count;
 	int inodes_per_group = sbi->inodes_per_group;
 	struct hdd_group_desc *desc;
@@ -30,9 +29,9 @@ static int find_group_orlov(struct super_block *sb, struct inode *parent)
 	int avefreei;
 	int free_blocks;
 	int avefreeb;
-	int blocks_per_dir;
+	//int blocks_per_dir;
 	//int ndirs;
-	int max_debt, max_dirs, min_blocks, min_inodes;
+	int /*max_debt,*/ max_dirs, min_blocks, min_inodes;
 	int group = -1, i;
 
 	freei = percpu_counter_read_positive(&sbi->free_inodes_count);
@@ -318,9 +317,9 @@ got:
 
 	/* 初始化 inode */
 	inode->i_uid = current_fsuid();
-	if (test_opt (sb, GRPID))
+	/*if (test_opt (sb, GRPID))
 		inode->i_gid = dir->i_gid;
-	else if (dir->i_mode & S_ISGID) {
+	else */if (dir->i_mode & S_ISGID) {
 		inode->i_gid = dir->i_gid;
 		if (S_ISDIR(mode))
 			mode |= S_ISGID;
@@ -428,8 +427,8 @@ void hdd_free_inode (struct inode * inode)
 		goto error_return;
 	}
 	
-	block_group = ino / HDD_INODES_PER_GROUP;  /* 计算 inode 所在块组 */
-	bit = ino % HDD_INODES_PER_GROUP;
+	block_group = ino / HDD_INODES_PER_GROUP(sb);  /* 计算 inode 所在块组 */
+	bit = ino % HDD_INODES_PER_GROUP(sb);
 
 	bitmap_bh = read_inode_bitmap(sb, block_group);  /* 读取 inode 位图 */
 	if (!bitmap_bh)
