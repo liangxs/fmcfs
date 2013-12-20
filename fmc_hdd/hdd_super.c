@@ -558,6 +558,7 @@ static int hdd_fill_sb(struct super_block *sb, void *data, int silent)
 	struct inode *root;
 	long err = -EINVAL;
 	int i, j;
+	struct qstr name = {.name="/", .len=1 };
 
 	sbi = kzalloc(sizeof(*sbi), GFP_KERNEL);/* 分配私有信息 */
 	if (!sbi) {
@@ -654,17 +655,32 @@ static int hdd_fill_sb(struct super_block *sb, void *data, int silent)
 		goto release_ssd;
 	}
 
-	sb->s_root = d_alloc_root(root);	/* 分配根目录项 */
+	fmc_debug("before d_alloc_root () ............\n");
+
+/*	sb->s_root = d_alloc(NULL, &name);
+
+	fmc_debug("after d_alloc\n");
+	return -ENOMEM;
+*/	
+//	sb->s_root = d_alloc_root(root);	/* 分配根目录项 */
+/*	fmc_debug("after d_alloc_root, before  iput() ............\n");
+	return -ENOMEM;
+
 	if (!sb->s_root) {
 		iput(root);
 		err = -ENOMEM;
 		hdd_msg(sb, KERN_ERR,__func__,"get root inode failed");
 		goto release_ssd;
 	}
+*/
+	fmc_debug("Before hdd_setup_super() ............\n");
+//	return -ENOMEM;
 
 	/* 检查文件系统 */
 	hdd_setup_super(sb, hdd_sb, sb->s_flags & MS_RDONLY);
-
+	
+	fmc_debug("After hdd_setup_super() ............\n");
+	return -ENOMEM;
 	return 0;
 
 release_ssd:
@@ -765,6 +781,7 @@ static int __init init_hdd_fs(void)
 	if (err)
 		goto out;
 
+	printk("registered fmc_hdd filesystem.............\n");
 	return 0;
 out:
 	destroy_inodecache();/*销毁 inode 私有信息缓存 */
@@ -776,6 +793,7 @@ out1:
 static void __exit exit_hdd_fs(void)
 {
 	unregister_filesystem(&hdd_fs_type);
+	printk("Unregistered fmc_hdd filesystem.............\n");
 	destroy_inodecache();/*销毁 inode 私有信息缓存 */
 }
 

@@ -1,9 +1,9 @@
 
 all:
-	gcc -Wall -g -o ../bin/fmc_ssd fmc_ssd.c -luuid
-	gcc -Wall -g -o ../bin/fmc_hdd fmc_hdd.c -luuid
+	gcc -Wall -g -o ../bin/mkfs_ssd fmc_ssd.c -luuid
+	gcc -Wall -g -o ../bin/mkfs_hdd fmc_hdd.c -luuid
 
 clean:
-	rm ../bin/fmc_ssd
-	rm ../bin/fmc_hdd
+	rm ../bin/mkfs_ssd
+	rm ../bin/mkfs_hdd
 		

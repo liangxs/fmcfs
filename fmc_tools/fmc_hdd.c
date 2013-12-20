@@ -615,7 +615,7 @@ static int hdd_write_root_inode(void)
 	rawi.i_links_count = cpu_to_le16(2);		/* 硬链接数 */
 	rawi.i_uid  = cpu_to_le32(getuid());		/* Owner Uid */
 	rawi.i_gid  = cpu_to_le32(getgid());		/* Group Id */
-	rawi.i_size = cpu_to_le64(2 * hdd_vars.block_size);/* 文件长度 */
+	rawi.i_size = cpu_to_le64(2 * 4096);/* 文件长度 */
 	rawi.i_blocks = cpu_to_le32(2);			/* 块数 */
 	rawi.i_atime = rawi.i_ctime = rawi.i_mtime
 		     = cpu_to_le32(time(NULL));		/* 时间 */
